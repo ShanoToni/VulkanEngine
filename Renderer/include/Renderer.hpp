@@ -7,12 +7,18 @@
 #include <vector>
 #include <iostream>
 #include <string.h>
+#include <map>
+#include <optional>
+#include <set>
+#include <cstdint>
+#include <algorithm>
 
 #include <GLFW/glfw3.h>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+// Validation layers 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
@@ -43,6 +49,23 @@ static void DestroyDebugUtilsMessengerExt(VkInstance instance,
             vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerExt");
 }
 
+// Queue family 
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
+
+    bool isComplete() {
+        return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+};
+
+// Swap Chain
+struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilites;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 
 class Renderer{
 public:
@@ -56,10 +79,51 @@ private:
     void mainLoop();
     void cleanup();
 
-// Vulkan setup 
+// Vulkan Device Physical
+    void pickPhysicalDevice();
+    int rateDevice(const VkPhysicalDevice& device);
+    bool isDeviceSuitable(const VkPhysicalDevice& device);
+    bool checkDeivceExtensionsSupport(const VkPhysicalDevice& device);
+
+    VkPhysicalDevice physicalDevice;
+    const std::vector<const char*> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
+
+// Vulkan Device 
+    void createLogicalDevice();
+
+    VkDevice device;
+
+// Queue Families
+    QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& device);
+
+    VkQueue graphicsQueue;
+    VkQueue presentQueue;
+
+// Vulkan instace 
     void createInstance();
-// Vulkan variables
+
     VkInstance instance;
+
+// Window Surface
+    void createSurface();
+
+    VkSurfaceKHR surface;
+
+// SwapChain
+    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+    VkPresentModeKHR choosePresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilites);
+    void createSwapChain();
+    void createImageViews();
+
+    VkSwapchainKHR swapChain;
+    VkFormat swapChainImageFormat;
+    VkExtent2D swapChainExtent;
+    std::vector<VkImage> swapChainImages;
+    std::vector<VkImageView> swapChainImageViews;
 
 
 // Validation layers
