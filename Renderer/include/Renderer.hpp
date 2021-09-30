@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <string.h>
 
 #include <GLFW/glfw3.h>
 

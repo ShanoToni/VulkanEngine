@@ -40,18 +40,27 @@ target_include_directories(VkEngine PUBLIC ${GLFW_INC})
 target_include_directories(VkEngine PUBLIC ${REDER_INC})
 target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
 
-set_target_properties(VkEngine PROPERTIES 
-	VS_DEBUGGER_WORKING_DIRECTORY
-	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
-)
+if (MSVC)
+	set_target_properties(VkEngine PROPERTIES 
+		VS_DEBUGGER_WORKING_DIRECTORY
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)
+	)
 
-# Copy
-add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
-	-E copy_directory
-	"${PROJECT_SOURCE_DIR}/resources"
-	${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/resources
-)
+	# Copy
+	add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+		-E copy_directory
+		"${PROJECT_SOURCE_DIR}/resources"
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/resources
+	)
 
+else()
+	# Copy
+	add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
+		-E copy_directory
+		"${PROJECT_SOURCE_DIR}/resources"
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}resources
+	)
+endif()
 add_dependencies(VkEngine copy_resources)
 
 
