@@ -12,6 +12,7 @@
 #include <set>
 #include <cstdint>
 #include <algorithm>
+#include <fstream>
 
 #include <GLFW/glfw3.h>
 
@@ -125,6 +126,10 @@ private:
     std::vector<VkImage> swapChainImages;
     std::vector<VkImageView> swapChainImageViews;
 
+// Graphics Pipeline
+    void createGraphicsPipeline();
+    static std::vector<char> readFile(const std::string& filename);
+    VkShaderModule createShaderModule(const std::vector<char>& code);
 
 // Validation layers
     bool checkValidationLayerSupport();

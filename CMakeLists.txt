@@ -40,6 +40,15 @@ target_include_directories(VkEngine PUBLIC ${GLFW_INC})
 target_include_directories(VkEngine PUBLIC ${REDER_INC})
 target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
 
+# Compile the shaders based on platform
+if(MSVC)
+   execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile.bat)
+endif(MSVC)
+
+if(UNIX)
+   execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile.sh)
+endif(UNIX)
+
 if (MSVC)
 	set_target_properties(VkEngine PROPERTIES 
 		VS_DEBUGGER_WORKING_DIRECTORY
@@ -62,5 +71,6 @@ else()
 	)
 endif()
 add_dependencies(VkEngine copy_resources)
+
 
 
