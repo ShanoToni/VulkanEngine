@@ -131,6 +131,14 @@ private:
     static std::vector<char> readFile(const std::string& filename);
     VkShaderModule createShaderModule(const std::vector<char>& code);
 
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
+
+// Render Pass
+    void createRenderPass();
+
+    VkRenderPass renderPass;
+
 // Validation layers
     bool checkValidationLayerSupport();
     std::vector<const char*> glfwGetRequiredExtensions();
