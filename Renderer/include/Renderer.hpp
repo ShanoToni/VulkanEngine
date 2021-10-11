@@ -19,6 +19,8 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 // Validation layers 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -78,6 +80,7 @@ public:
 private:
     void initVulkan();
     void mainLoop();
+    void drawFrame();
     void cleanup();
 
 // Vulkan Device Physical
@@ -119,6 +122,8 @@ private:
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilites);
     void createSwapChain();
     void createImageViews();
+    void recreateSwapChain();
+    void cleanupSwapchain();
 
     VkSwapchainKHR swapChain;
     VkFormat swapChainImageFormat;
@@ -138,6 +143,33 @@ private:
     void createRenderPass();
 
     VkRenderPass renderPass;
+
+// Framebuffers
+void createFrameBuffers();
+
+std::vector<VkFramebuffer> swapChainFrameBuffers;
+
+// Command Buffers
+void createCommandPool();
+void createCommandBuffers();
+
+VkCommandPool commandPool;
+std::vector<VkCommandBuffer> commandBuffers;
+
+// Synchronization
+void createSyncObjects();
+
+std::vector<VkSemaphore> imageAvailableSemaphores;
+std::vector<VkSemaphore> renderFinishedSemaphores;
+std::vector<VkFence> inFlightFences;
+std::vector<VkFence> imagesInFlight;
+size_t currentFrame;
+
+public:
+inline void setFrameBufferResized(bool var) {frameBufferResized = var;}
+private:
+
+bool frameBufferResized;
 
 // Validation layers
     bool checkValidationLayerSupport();
@@ -168,5 +200,11 @@ private:
     } windowDestroy;
     std::unique_ptr<GLFWwindow, DestroyglfwWin> window;
 };
+
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+    auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    app->setFrameBufferResized(true);
+}
+
 
 #endif //RENDERER_CLASS
