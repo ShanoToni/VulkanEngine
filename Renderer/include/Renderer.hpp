@@ -13,7 +13,9 @@
 #include <cstdint>
 #include <algorithm>
 #include <fstream>
+#include <array>
 
+#include "glm.hpp"
 #include <GLFW/glfw3.h>
 
 const uint32_t WIDTH = 800;
@@ -24,6 +26,35 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 // Validation layers 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
+};
+
+struct Vertex {
+    glm::vec2 pos;
+    glm::vec3 color;
+
+    static VkVertexInputBindingDescription getBindingDescriptor() {
+        VkVertexInputBindingDescription bindingDescriptor{};
+        bindingDescriptor.binding = 0;
+        bindingDescriptor.stride = sizeof(Vertex);
+        bindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescriptor;
+    }
+    static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescription() {
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+        
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        return attributeDescriptions;
+    }
 };
 
 #ifdef NDEBUG
@@ -155,6 +186,34 @@ void createCommandBuffers();
 
 VkCommandPool commandPool;
 std::vector<VkCommandBuffer> commandBuffers;
+
+// Vertex Buffers
+void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+                VkMemoryPropertyFlags properties, VkBuffer &buffer,
+                VkDeviceMemory& bufferMemory);
+void createVertexBuffer();
+void createIndexBuffer();
+
+void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+const std::vector<Vertex> vertices = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint16_t> indices = {
+    0, 1, 2, 2, 3, 0
+};
+
+VkBuffer vertexBuffer;
+VkDeviceMemory vertexBufferMemory;
+VkBuffer indexBuffer;
+VkDeviceMemory indexBufferMemory;
+
+// Memory requirements
+uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
 // Synchronization
 void createSyncObjects();
