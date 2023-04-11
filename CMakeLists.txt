@@ -13,11 +13,10 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 # Dependencies
 # GLFW
-message(STATUS "print_all_variables------------------------------------------{")
-
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/glfw)
 set(GLFW_INC ${CMAKE_SOURCE_DIR}/external/glfw/include)
 link_directories(${CMAKE_SOURCE_DIR}/external/glfw/lib)
+
 
 # GLM
 set(GLM_INC ${CMAKE_SOURCE_DIR}/external/glm/glm)
@@ -27,7 +26,7 @@ find_package(Vulkan REQUIRED)
 
 # Renderer
 add_subdirectory("Renderer")
-set(REDER_INC ${CMAKE_SOURCE_DIR}/Renderer/include)
+set(RENDER_INC ${CMAKE_SOURCE_DIR}/Renderer/include)
 link_directories("${CMAKE_SOURCE_DIR}/Renderer/include")
 
 # Executable
@@ -35,9 +34,8 @@ include_directories(include)
 file(GLOB_RECURSE SOURCES src/*.cpp include/*.h include/*.hpp)
 add_executable(VkEngine ${SOURCES})
 target_include_directories(VkEngine PUBLIC ${Vulkan_INCLUDE_DIRS})
-target_include_directories(VkEngine PRIVATE ${GLM_INC})
-target_include_directories(VkEngine PUBLIC ${GLFW_INC})
-target_include_directories(VkEngine PUBLIC ${REDER_INC})
+target_include_directories(VkEngine PUBLIC ${GLM_INC})
+target_include_directories(VkEngine PUBLIC ${RENDER_INC})
 target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
 
 # Compile the shaders based on platform
