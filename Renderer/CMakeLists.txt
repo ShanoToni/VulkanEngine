@@ -28,6 +28,9 @@ set(GLM_INC ${CMAKE_SOURCE_DIR}/external/glm/glm)
 # STB Image Loader
 set(STB_INC ${CMAKE_SOURCE_DIR}/external/stb)
 
+# TinyOBJLoader
+set(TINY_INC ${CMAKE_SOURCE_DIR}/external/tinyobj)
+
 # Vulkan
 find_package(Vulkan REQUIRED)
 target_include_directories(renderer PUBLIC ${Vulkan_INCLUDE_DIRS})
@@ -35,5 +38,5 @@ target_link_libraries(renderer Vulkan::Vulkan)
 
 # Build Dependencies
 #add_executable(ENGINE ${SOURCES})
-include_directories(renderer PUBLIC ${SFML_INCS} ${GLM_INC} ${STB_INC})
+include_directories(renderer PUBLIC ${SFML_INCS} ${GLM_INC} ${STB_INC} ${TINY_INC})
 link_libraries(renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)

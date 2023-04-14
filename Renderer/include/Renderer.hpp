@@ -253,8 +253,10 @@ class Renderer {
     VkDeviceMemory textureImageMemory;
 
     void createImageViews();
+
     VkImageView createImageView(VkImage image, VkFormat format,
                                 VkImageAspectFlags aspectFlags);
+                                
     void createTextureImageView();
 
     VkImageView textureImageView;
