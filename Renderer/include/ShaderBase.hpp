@@ -8,9 +8,8 @@
 
 class ShaderBase {
   public:
-    ShaderBase(std::string vertexShaderPath, std::string fragmentShaderPath);
-    ShaderBase(std::string vertexShaderPath, std::string fragmentShaderPath,
-               std::vector<MeshBase*> meshesToAdd);
+    ShaderBase();
+    ShaderBase(const std::vector<Mesh*> meshesToAdd);
 
     void initShaderPipeline(float W, float H, VkExtent2D swapChainExtent,
                             VkRenderPass renderPass, VkDevice device);
@@ -19,9 +18,9 @@ class ShaderBase {
     void createDescriptorSet(std::vector<VkImage> swapChainImages,
                              VkDevice device);
 
-    void addMesh(MeshBase* mesheToAdd);
+    void addMesh(Mesh* mesheToAdd);
 
-    // std::vector<MeshBase*> getMeshes();
+    const std::vector<std::unique_ptr<Mesh>>& getMeshes() { return meshes; }
     VkPipeline getPipeline() { return ShaderPipeline; }
     inline VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
@@ -32,9 +31,19 @@ class ShaderBase {
 
     // inline bool inUse() { return meshes.size() > 0 ? true : false; }
 
-    virtual ~ShaderBase() = 0;
+    // virtual ~ShaderBase() = 0;
+
+    void cleanup(VkDevice device);
 
   private:
+#ifdef __linux__
+    std::string vertexShaderPath = "./bin/resources/shaders/vert.spv";
+    std::string fragmentShaderPath = "./bin/resources/shaders/frag.spv";
+#elif _WIN32
+    std::string vertexShaderPath = "bin/Debug/resources/shaders/vert.spv";
+    std::string fragmentShaderPath = "bin/Debug/resources/shaders/frag.spv";
+#endif
+
     std::vector<char> readfile(std::string filepath);
     VkShaderModule createShaderModule(const std::vector<char>& code,
                                       VkDevice device);
@@ -47,7 +56,7 @@ class ShaderBase {
 
     std::string vertPath;
     std::string fragPath;
-    // std::vector<<MeshBase*> meshes;
+    std::vector<std::unique_ptr<Mesh>> meshes;
 };
 
 #endif // SHADER_BASE_CLASS

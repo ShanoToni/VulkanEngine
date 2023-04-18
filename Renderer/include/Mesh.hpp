@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Camera.hpp"
+#include "Texture.hpp"
 #include "utils.hpp"
 
 #include <fstream>
@@ -101,6 +102,7 @@ struct Vertex {
 class Mesh {
   public:
     Mesh();
+    Mesh(const Mesh& other);
     Mesh(std::vector<Vertex> verts);
     Mesh(std::string filePath);
 
@@ -125,7 +127,7 @@ class Mesh {
     void setIndices(std::vector<uint32_t> indicesToSet);
 
     glm::mat4 getModel() { return model; }
-    VkDescriptorSet getDescriptorSet() { return descriptorSet; }
+    VkDescriptorSet& getDescriptorSet() { return descriptorSet; }
     std::vector<VkBuffer>& getUniformBuffers() { return uniformBuffers; }
     std::vector<VkDeviceMemory>& getUniformBufferMemory() {
         return uniformBuffersMemory;
@@ -135,6 +137,9 @@ class Mesh {
     VkDeviceMemory& getVertexBufferMemory() { return vertexBufferMemory; }
     VkBuffer& getIndexBuffer() { return indexBuffer; }
     VkDeviceMemory& getIndexBufferMemory() { return indexBufferMemory; }
+
+    void setTexture(Texture* tex) { texture.reset(tex); }
+    const inline std::unique_ptr<Texture>& getTexture() { return texture; }
 
   protected:
     std::vector<Vertex> vertices;
@@ -150,6 +155,8 @@ class Mesh {
 
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
+
+    std::unique_ptr<Texture> texture;
 };
 
 #endif // MESH_CLASS

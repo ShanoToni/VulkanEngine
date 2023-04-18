@@ -5,6 +5,24 @@
 
 Mesh::Mesh() { model = glm::mat4(1.0f); }
 
+Mesh::Mesh(const Mesh& other) {
+    vertices = other.vertices;
+    indices = other.indices;
+    descriptorSet = other.descriptorSet;
+    ubo = other.ubo;
+    model = other.model;
+
+    vertexBuffer = other.vertexBuffer;
+    vertexBufferMemory = other.vertexBufferMemory;
+    indexBuffer = other.indexBuffer;
+    indexBufferMemory = other.indexBufferMemory;
+
+    uniformBuffers = other.uniformBuffers;
+    uniformBuffersMemory = other.uniformBuffersMemory;
+
+    texture.reset(other.texture.get());
+}
+
 Mesh::Mesh(std::vector<Vertex> verts) {
     for (auto Vertex : verts) {
         vertices.push_back(Vertex);
@@ -40,7 +58,7 @@ Mesh::Mesh(std::string filePath) {
             vertex.color = glm::vec3(1.0f);
 
             vertices.push_back(vertex);
-            indices.push_back(indices.size());
+            indices.push_back(static_cast<uint32_t>(indices.size()));
         }
     }
     model = glm::mat4(1.0f);
@@ -130,7 +148,8 @@ void Mesh::createDescriptorSets(std::vector<VkImage> swapChainImages,
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<size_t>(swapChainImages.size());
+    allocInfo.descriptorSetCount =
+        static_cast<uint32_t>(swapChainImages.size());
     allocInfo.pSetLayouts = layouts.data();
 
     if (vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet) !=
@@ -145,12 +164,11 @@ void Mesh::createDescriptorSets(std::vector<VkImage> swapChainImages,
         bufferInfo.range = sizeof(BasicUBO);
 
         // No Images for mesh for now
-        /*
+
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = textureImageView;
-        imageInfo.sampler = textureSampler;
-        */
+        imageInfo.imageView = texture->getTextureImageView();
+        imageInfo.sampler = texture->getTextureSampler();
 
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

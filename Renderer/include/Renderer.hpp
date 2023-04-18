@@ -1,6 +1,8 @@
 #ifndef RENDERER_CLASS
 #define RENDERER_CLASS
 
+#include "ShaderBase.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include <algorithm>
 #include <array>
@@ -31,7 +33,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 // Validation layers
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"};
-
+/*
 struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;
@@ -74,7 +76,7 @@ struct UniformBufferObject {
     glm::mat4 view;
     glm::mat4 proj;
 };
-
+*/
 #ifdef NDEBUG
 const bool enableVailidationLayers = false;
 #else
@@ -182,8 +184,9 @@ class Renderer {
 
     // Graphics Pipeline
     void createGraphicsPipeline();
-    static std::vector<char> readFile(const std::string& filename);
+    /*
     VkShaderModule createShaderModule(const std::vector<char>& code);
+    */
 
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
@@ -217,19 +220,21 @@ class Renderer {
     void createIndexBuffer();
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+    /*
+        const std::vector<Vertex> vertices = {
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
-    const std::vector<Vertex> vertices = {
-        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
 
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
-
-    const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
+        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7,
+       4};
+    */
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
@@ -239,31 +244,32 @@ class Renderer {
     // Descriptor pool
     void createDescriptorPool();
 
+    void createTextureImage();
+
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
 
     // Image Loader
-    void createTextureImage();
     void createImage(uint32_t W, uint32_t H, VkFormat format,
                      VkImageTiling tiling, VkImageUsageFlags usage,
                      VkMemoryPropertyFlags properties, VkImage& image,
                      VkDeviceMemory& imageMemory);
 
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
+    // VkImage textureImage;
+    // VkDeviceMemory textureImageMemory;
 
     void createImageViews();
 
     VkImageView createImageView(VkImage image, VkFormat format,
                                 VkImageAspectFlags aspectFlags);
-                                
+
     void createTextureImageView();
 
     VkImageView textureImageView;
 
     void createTextureSampler();
 
-    VkSampler textureSampler;
+    // VkSampler textureSampler;
 
     // depth
     void createDepthResources();
@@ -319,6 +325,15 @@ class Renderer {
     inline void setFrameBufferResized(bool var) { frameBufferResized = var; }
 
   private:
+    // Shaders
+    std::unique_ptr<ShaderBase> testShader;
+
+    // Texture
+    Texture tex;
+
+    // Camera
+    Camera* cam;
+
     bool frameBufferResized;
 
     // Validation layers
