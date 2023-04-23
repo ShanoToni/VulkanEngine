@@ -11,8 +11,8 @@ ShaderBase::ShaderBase(const std::vector<Mesh*> meshesToAdd) {
 void ShaderBase::initShaderPipeline(float W, float H,
                                     VkExtent2D swapChainExtent,
                                     VkRenderPass renderPass, VkDevice device) {
-    auto vertShaderCode = readfile("vertexShaderPath");
-    auto fragShaderCode = readfile("fragmentShaderPath");
+    auto vertShaderCode = readfile(vertexShaderPath);
+    auto fragShaderCode = readfile(fragmentShaderPath);
 
     VkShaderModule vertShaderModule =
         createShaderModule(vertShaderCode, device);
@@ -143,6 +143,7 @@ void ShaderBase::initShaderPipeline(float W, float H,
     // Dynamic state
 
     VkDynamicState dynamicStates[] = {VK_DYNAMIC_STATE_VIEWPORT,
+                                      VK_DYNAMIC_STATE_SCISSOR,
                                       VK_DYNAMIC_STATE_LINE_WIDTH};
 
     VkPipelineDynamicStateCreateInfo dynamicState{};
@@ -174,7 +175,7 @@ void ShaderBase::initShaderPipeline(float W, float H,
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pColorBlendState = &colorBlending;
-    pipelineInfo.pDynamicState = nullptr;
+    pipelineInfo.pDynamicState = &dynamicState;
 
     pipelineInfo.layout = pipelineLayout;
     pipelineInfo.renderPass = renderPass;
@@ -256,7 +257,7 @@ std::vector<char> ShaderBase::readfile(std::string filepath) {
     std::ifstream file(filepath, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file!");
+        throw std::runtime_error("Failed to open file!: " + filepath);
     }
 
     size_t fileSize = (size_t)file.tellg();

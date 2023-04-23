@@ -38,8 +38,8 @@ Renderer::Renderer()
                                            {0.0f, 1.0f, 0.0f}}};
 
     Mesh* mesh = new Mesh(vertices);
-    const std::vector<uint32_t> indices = {0, 1, 2,
-                                           2, 3, 0 , 4, 5, 6, 6, 7, 4};
+    mesh->scale(glm::vec3(500.f));
+    const std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
     mesh->setIndices(indices);
 #ifdef __linux__
     tex = Texture("./bin/resources/textures/statue.jpg");

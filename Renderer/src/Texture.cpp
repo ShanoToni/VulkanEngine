@@ -6,10 +6,7 @@
 static inline unsigned char* loadTextureData(std::string FilePath,
                                              int& texWidth, int& texHeight,
                                              int& texChannels) {
-    std::cout << "PATH:::::" << FilePath << std::endl;
 
-    FilePath = "bin/Debug/resources/textures/statue.jpg";
-    std::cout << "PATH:::::" << FilePath << std::endl;
     stbi_uc* pixels = stbi_load(FilePath.c_str(), &texWidth, &texHeight,
                                 &texChannels, STBI_rgb_alpha);
 
