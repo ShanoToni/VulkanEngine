@@ -142,7 +142,8 @@ class Renderer {
 
     VkPhysicalDevice physicalDevice;
     const std::vector<const char*> deviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME};
 
     // Vulkan Device
     void createLogicalDevice();
@@ -370,6 +371,43 @@ static void framebufferResizeCallback(GLFWwindow* window, int width,
                                       int height) {
     auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
     app->setFrameBufferResized(true);
+}
+
+static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    Camera* cam = reinterpret_cast<Camera*>(glfwGetWindowUserPointer(window));
+
+    if (cam->getFirstMouse()) {
+        cam->getLastX() = xpos;
+        cam->getLastY() = ypos;
+        cam->getFirstMouse() = false;
+    }
+
+    float xoffset = xpos - cam->getLastX();
+    float yoffset = cam->getLastY() - ypos;
+    cam->getLastX() = xpos;
+    cam->getLastY() = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    cam->getYaw() += xoffset;
+    cam->getPitch() += yoffset;
+
+    if (cam->getPitch() > 89.0f)
+        cam->getPitch() = 89.0f;
+    if (cam->getPitch() < -89.0f)
+        cam->getPitch() = -89.0f;
+
+    glm::vec3 direction;
+    direction.x =
+        cos(glm::radians(cam->getYaw())) * cos(glm::radians(cam->getPitch()));
+    direction.y = sin(glm::radians(cam->getPitch()));
+    direction.z =
+        sin(glm::radians(cam->getYaw())) * cos(glm::radians(cam->getPitch()));
+    cam->getCamFront() = glm::normalize(direction);
+
+    cam->update();
 }
 
 #endif // RENDERER_CLASS

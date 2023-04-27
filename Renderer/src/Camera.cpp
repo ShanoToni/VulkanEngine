@@ -1,18 +1,21 @@
 #include "Camera.hpp"
+#include <iostream>
 
 Camera::Camera(GLFWwindow* window, glm::vec3 camPos, glm::vec3 camTarget,
                glm::vec3 up)
     : cameraPos(camPos), cameraTarget(camTarget), up(up) {
     cameraDirection = glm::normalize(cameraPos - cameraTarget);
-    cameraRight = glm::normalize(glm::cross(up, cameraTarget));
-    cameraUp = glm::normalize(glm::cross(cameraDirection, cameraRight));
+    cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+    cameraUp = glm::cross(cameraDirection, cameraRight);
     cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     view = glm::lookAt(cameraFront, cameraPos + cameraFront, cameraUp);
 
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction = cameraDirection;
+    cameraRight = glm::normalize(glm::cross(cameraFront, up));
+    cameraUp = glm::normalize(glm::cross(cameraRight, direction));
 
+    //update();
+    count = 100;
     firstMouse = true;
 
     glfwSetWindowUserPointer(window, reinterpret_cast<void*>(this));
@@ -53,4 +56,13 @@ void Camera::update() {
 
     cameraRight = glm::normalize(glm::cross(cameraFront, up));
     cameraUp = glm::normalize(glm::cross(cameraRight, direction));
+
+    cameraFront = glm::normalize(direction);
+    if (count == 0) {
+        count = 100;
+        std::cout <<"Dir:" <<glm::to_string(direction) << std::endl;
+        std::cout << "Pitch pls:" << pitch << std::endl;
+    } else {
+        --count;
+    }
 }

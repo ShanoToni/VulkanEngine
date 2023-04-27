@@ -9,11 +9,12 @@
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+#include "gtx/string_cast.hpp"
 
 class Camera {
   public:
-    Camera(GLFWwindow* window, glm::vec3 camPos = glm::vec3(0.0f, 5.0f, 5.0f),
-           glm::vec3 camTarget = glm::vec3(0.0f),
+    Camera(GLFWwindow* window, glm::vec3 camPos = glm::vec3(0.0f, 2.0f, -11.0f),
+           glm::vec3 camTarget = glm::vec3(-2.0f, 3.0f, 1.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f));
     void processInput(GLFWwindow* window);
 
@@ -48,9 +49,10 @@ class Camera {
     glm::mat4 view;
     glm::vec3 cameraFront;
     bool firstMouse;
+    int count;
 
-    float yaw = 0.0f;
-    float pitch = -90.0f;
+    float yaw = 90.0f;
+    float pitch = 0.0f;
 
     glm::vec3 direction;
     float lastX = 400, lastY = 300;

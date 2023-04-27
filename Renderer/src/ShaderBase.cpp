@@ -257,7 +257,21 @@ std::vector<char> ShaderBase::readfile(std::string filepath) {
     std::ifstream file(filepath, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file!: " + filepath);
+        if (vertexShaderPath == filepath) {
+#ifdef __linux__
+            std::string vertexShaderPath = "./bin/resources/shaders/vert.spv";
+#elif _WIN32
+            return readfile("resources/shaders/vert.spv");
+#endif
+        } else if (fragmentShaderPath == filepath) {
+#ifdef __linux__
+            std::string fragmentShaderPath = "./bin/resources/shaders/frag.spv";
+#elif _WIN32
+            return readfile("resources/shaders/frag.spv");
+#endif
+        } else {
+            throw std::runtime_error("Failed to open file!: " + filepath);
+        }
     }
 
     size_t fileSize = (size_t)file.tellg();

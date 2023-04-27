@@ -9,12 +9,22 @@ static inline unsigned char* loadTextureData(std::string FilePath,
 
     stbi_uc* pixels = stbi_load(FilePath.c_str(), &texWidth, &texHeight,
                                 &texChannels, STBI_rgb_alpha);
-
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
-
     if (!pixels) {
+#ifdef __linux__
+        if ("./bin/resources/textures/statue.jpg" == FilePath) {
+            return loadTextureData("./bin/resources/textures/statue.jpg",
+                                   texWidth, texHeight, texChannels);
+        }
+#elif _WIN32
+        if ("bin/Debug/resources/textures/statue.jpg" == FilePath) {
+            return loadTextureData("resources/textures/statue.jpg", texWidth,
+                                   texHeight, texChannels);
+        }
+#endif
         throw std::runtime_error("Failed to load texture image!");
     }
+
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     return pixels;
 }
