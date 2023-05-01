@@ -10,7 +10,8 @@ ShaderBase::ShaderBase(const std::vector<Mesh*> meshesToAdd) {
 
 void ShaderBase::initShaderPipeline(float W, float H,
                                     VkExtent2D swapChainExtent,
-                                    VkRenderPass renderPass, VkDevice device) {
+                                    VkRenderPass renderPass, VkDevice device,
+                                    VertexData dataType) {
     auto vertShaderCode = readfile(vertexShaderPath);
     auto fragShaderCode = readfile(fragmentShaderPath);
 
@@ -44,7 +45,19 @@ void ShaderBase::initShaderPipeline(float W, float H,
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
     auto bindingDescritption = Vertex::getBindingDescription();
-    auto attributeDescription = Vertex::getAttributeDescriptionsPosColTex();
+    std::vector<VkVertexInputAttributeDescription> attributeDescription;
+    switch (dataType) {
+    case VertexData::PosCol:
+        attributeDescription = Vertex::getAttributeDescriptionsPosCol();
+        break;
+    case VertexData::PosColTex:
+        attributeDescription = Vertex::getAttributeDescriptionsPosColTex();
+        break;
+    case VertexData::PosColTexNorm:
+        attributeDescription =
+            Vertex::getAttributeDescriptionsPosColTexNormal();
+        break;
+    }
 
     BasicVertexInputInfo.vertexBindingDescriptionCount = 1;
     BasicVertexInputInfo.vertexAttributeDescriptionCount =
@@ -240,7 +253,9 @@ void ShaderBase::createDescriptorSet(std::vector<VkImage> swapChainImages,
     }
 }
 
-void ShaderBase::addMesh(Mesh* mesheToAdd) {}
+void ShaderBase::addMesh(Mesh* meshToAdd) {
+    meshes.push_back(std::make_unique<Mesh>(*meshToAdd));
+}
 
 void ShaderBase::cleanup(VkDevice device) {
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
@@ -261,13 +276,13 @@ std::vector<char> ShaderBase::readfile(std::string filepath) {
 #ifdef __linux__
             std::string vertexShaderPath = "./bin/resources/shaders/vert.spv";
 #elif _WIN32
-            return readfile("resources/shaders/vert.spv");
+            return readfile("resources/shaders/physics_vert.spv");
 #endif
         } else if (fragmentShaderPath == filepath) {
 #ifdef __linux__
             std::string fragmentShaderPath = "./bin/resources/shaders/frag.spv";
 #elif _WIN32
-            return readfile("resources/shaders/frag.spv");
+            return readfile("resources/shaders/physics_frag.spv");
 #endif
         } else {
             throw std::runtime_error("Failed to open file!: " + filepath);

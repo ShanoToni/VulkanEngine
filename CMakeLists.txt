@@ -31,7 +31,8 @@ link_directories("${CMAKE_SOURCE_DIR}/Renderer/include")
 
 # Executable
 include_directories(include)
-file(GLOB_RECURSE SOURCES src/*.cpp include/*.h include/*.hpp)
+include_directories(include/Renderer)
+file(GLOB_RECURSE SOURCES src/*.cpp include/*.h include/*.hpp include/Shaders/*.cpp)
 add_executable(VkEngine ${SOURCES})
 target_include_directories(VkEngine PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(VkEngine PUBLIC ${GLM_INC})

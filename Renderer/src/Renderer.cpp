@@ -20,7 +20,7 @@ Renderer::Renderer()
                                            {0.0f, 1.0f},
                                            {0.0f, 1.0f, 0.0f}}};
 
-    Mesh* mesh = new Mesh(vertices);
+    PhysicsMesh* mesh = new PhysicsMesh(vertices);
     mesh->scale(glm::vec3(10.f, 1.f, 10.f));
     const std::vector<uint32_t> indices = {0, 1, 2, 1, 3, 2};
     mesh->setIndices(indices);
@@ -31,9 +31,8 @@ Renderer::Renderer()
 #endif
     mesh->setTexture(&tex);
 
-    testShader.reset(new ShaderBase({std::move(mesh)}));
-
-   
+    // testShader.reset(new ShaderBase({std::move(mesh)}));
+    physicsShader.reset(new PhysicsShader({std::move(mesh)}));
 }
 
 void Renderer::run() {
@@ -516,8 +515,12 @@ Renderer::querySwapChainSupport(VkPhysicalDevice device) {
 }
 
 void Renderer::createGraphicsPipeline() {
-    testShader->initShaderPipeline(WIDTH, HEIGHT, swapChainExtent, renderPass,
-                                   device);
+    // testShader->initShaderPipeline(WIDTH, HEIGHT, swapChainExtent,
+    // renderPass,
+    //                                device, VertexData::PosCol);
+    physicsShader->initShaderPipeline(WIDTH, HEIGHT, swapChainExtent,
+                                      renderPass, device,
+                                      VertexData::PosColTexNorm);
 }
 
 void Renderer::createRenderPass() {
@@ -586,24 +589,36 @@ void Renderer::createRenderPass() {
 }
 
 void Renderer::createDescriptorSetLayout() {
-    testShader->createDescritorSetLayout(device);
+    // testShader->createDescritorSetLayout(device);
+    physicsShader->createDescritorSetLayout(device);
 }
 
 void Renderer::createUniformBuffers() {
-    for (auto& mesh : testShader->getMeshes()) {
+    // for (auto& mesh : testShader->getMeshes()) {
+    //     mesh->createUniformBuffers(swapChainImages, device, physicalDevice);
+    // }
+    for (auto& mesh : physicsShader->getMeshes()) {
         mesh->createUniformBuffers(swapChainImages, device, physicalDevice);
+        mesh->createLightingUBOBuffers(swapChainImages, device, physicalDevice);
     }
 }
 
 void Renderer::updateUniformBuffer(size_t currentImage) {
-    for (auto& mesh : testShader->getMeshes()) {
+    // for (auto& mesh : testShader->getMeshes()) {
+    //     mesh->updateUniformBuffer(static_cast<uint32_t>(currentImage), *cam,
+    //                               swapChainExtent, device);
+    // }
+    for (auto& mesh : physicsShader->getMeshes()) {
         mesh->updateUniformBuffer(static_cast<uint32_t>(currentImage), *cam,
                                   swapChainExtent, device);
+        mesh->setLightingUBOBuffers(currentImage, device, &light);
     }
 }
 
 void Renderer::createDescriptorPool() {
-    testShader->createDescriptorPool(
+    // testShader->createDescriptorPool(
+    //     device, static_cast<uint32_t>(swapChainImages.size()));
+    physicsShader->createDescriptorPool(
         device, static_cast<uint32_t>(swapChainImages.size()));
 }
 
@@ -856,73 +871,9 @@ void Renderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width,
 }
 
 void Renderer::createDescriptorSets() {
-    /*
-    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT,
-                                               descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<size_t>(MAX_FRAMES_IN_FLIGHT);
-    allocInfo.pSetLayouts = layouts.data();
-
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
-        VK_SUCCESS) {
-        throw std::runtime_error("Failed to allocate descriptor sets!");
-    }
-
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
-
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = textureImageView;
-        imageInfo.sampler = textureSampler;
-
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = descriptorSets[i];
-        descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType =
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
-
-        vkUpdateDescriptorSets(device,
-                               static_cast<uint32_t>(descriptorWrites.size()),
-                               descriptorWrites.data(), 0, nullptr);
-    }
-    */
-    testShader->createDescriptorSet(swapChainImages, device);
+    // testShader->createDescriptorSet(swapChainImages, device);
+    physicsShader->createDescriptorSet(swapChainImages, device);
 }
-/*
-VkShaderModule Renderer::createShaderModule(const std::vector<char>& code) {
-    VkShaderModuleCreateInfo createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) !=
-        VK_SUCCESS) {
-        throw std::runtime_error("Failed to create shader module!");
-    }
-
-    return shaderModule;
-}
-*/
 
 void Renderer::createFrameBuffers() {
     swapChainFrameBuffers.resize(swapChainImageViews.size());
@@ -1003,8 +954,7 @@ void Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer,
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           graphicsPipeline);
     */
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      testShader->getPipeline());
+
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -1019,7 +969,14 @@ void Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer,
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    for (auto& mesh : testShader->getMeshes()) {
+    // TEST SHADER BIND AND RENDER
+    // vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                  testShader->getPipeline());
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                      physicsShader->getPipeline());
+
+    // for (auto& mesh : testShader->getMeshes()) {
+    for (auto& mesh : physicsShader->getMeshes()) {
         VkBuffer vertexBuffers[] = {mesh->getVertexBuffer()};
         VkDeviceSize offsets[] = {0};
 
@@ -1028,8 +985,13 @@ void Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer,
         vkCmdBindIndexBuffer(commandBuffer, mesh->getIndexBuffer(), 0,
                              VK_INDEX_TYPE_UINT32);
 
+        // vkCmdBindDescriptorSets(commandBuffer,
+        // VK_PIPELINE_BIND_POINT_GRAPHICS,
+        //                         testShader->getPipelineLayout(), 0, 1,
+        //                         &(mesh->getDescriptorSet()), 0, nullptr);
+
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                testShader->getPipelineLayout(), 0, 1,
+                                physicsShader->getPipelineLayout(), 0, 1,
                                 &(mesh->getDescriptorSet()), 0, nullptr);
 
         // vkCmdDraw(commandBuffer,
@@ -1046,64 +1008,22 @@ void Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer,
 }
 
 void Renderer::createVertexBuffer() {
-    /*
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 stagingBuffer, stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device, stagingBufferMemory);
-
-    createBuffer(
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-
-    copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-    vkDestroyBuffer(device, stagingBuffer, nullptr);
-    vkFreeMemory(device, stagingBufferMemory, nullptr);
-    */
-    for (auto& mesh : testShader->getMeshes()) {
+    // for (auto& mesh : testShader->getMeshes()) {
+    //     mesh->createVertexBuffer(device, physicalDevice, commandPool,
+    //                              graphicsQueue);
+    // }
+    for (auto& mesh : physicsShader->getMeshes()) {
         mesh->createVertexBuffer(device, physicalDevice, commandPool,
                                  graphicsQueue);
     }
 }
 
 void Renderer::createIndexBuffer() {
-    /*
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 stagingBuffer, stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device, stagingBufferMemory);
-
-    createBuffer(
-        bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
-    copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-    vkDestroyBuffer(device, stagingBuffer, nullptr);
-    vkFreeMemory(device, stagingBufferMemory, nullptr);
-    */
-    for (auto& mesh : testShader->getMeshes()) {
+    // for (auto& mesh : testShader->getMeshes()) {
+    //     mesh->createIndexBuffer(device, physicalDevice, commandPool,
+    //                            graphicsQueue);
+    // }
+    for (auto& mesh : physicsShader->getMeshes()) {
         mesh->createIndexBuffer(device, physicalDevice, commandPool,
                                 graphicsQueue);
     }
@@ -1295,33 +1215,24 @@ void Renderer::cleanupSwapchain() {
 void Renderer::cleanup() {
     cleanupSwapchain();
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        // vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-        // vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
-    }
-
-    vkDestroyDescriptorPool(device, testShader->getDescriptorPool(), nullptr);
-    /*
-        vkDestroySampler(device, textureSampler, nullptr);
-        vkDestroyImageView(device, textureImageView, nullptr);
-
-        vkDestroyImage(device, textureImage, nullptr);
-        vkFreeMemory(device, textureImageMemory, nullptr);
-    */
+    // vkDestroyDescriptorPool(device, testShader->getDescriptorPool(),
+    // nullptr);
+    vkDestroyDescriptorPool(device, physicsShader->getDescriptorPool(),
+                            nullptr);
     tex.cleanup(device);
 
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
-    // vkDestroyBuffer(device, indexBuffer, nullptr);
-    // vkFreeMemory(device, indexBufferMemory, nullptr);
-
-    // vkDestroyBuffer(device, vertexBuffer, nullptr);
-    // vkFreeMemory(device, vertexBufferMemory, nullptr);
-
     // shaders
-    testShader->cleanup(device);
-    vkDestroyPipeline(device, testShader->getPipeline(), nullptr);
-    vkDestroyPipelineLayout(device, testShader->getPipelineLayout(), nullptr);
+    // testShader->cleanup(device);
+    // vkDestroyPipeline(device, testShader->getPipeline(), nullptr);
+    // vkDestroyPipelineLayout(device, testShader->getPipelineLayout(),
+    // nullptr);
+
+    physicsShader->cleanup(device);
+    vkDestroyPipeline(device, physicsShader->getPipeline(), nullptr);
+    vkDestroyPipelineLayout(device, physicsShader->getPipelineLayout(),
+                            nullptr);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);

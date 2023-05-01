@@ -49,7 +49,6 @@ class Camera {
     glm::mat4 view;
     glm::vec3 cameraFront;
     bool firstMouse;
-    int count;
 
     float yaw = 90.0f;
     float pitch = 0.0f;

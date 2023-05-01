@@ -12,8 +12,10 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 # Executable
 include_directories(include)
-file(GLOB_RECURSE SOURCES src/*.cpp include/*.h include/*.hpp)
+file(GLOB_RECURSE SOURCES src/*.cpp src/Shaders/*.cpp)
 add_library(renderer STATIC ${SOURCES})
+target_include_directories(renderer PUBLIC include)
+target_include_directories(renderer PUBLIC include/Shaders)
 
 target_include_directories(renderer PUBLIC ${GLFW_INC})
 target_link_libraries(renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)

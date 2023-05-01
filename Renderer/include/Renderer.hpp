@@ -1,7 +1,7 @@
 #ifndef RENDERER_CLASS
 #define RENDERER_CLASS
 
-#include "ShaderBase.hpp"
+#include "PhysicsShader.hpp"
 
 #define GLFW_INCLUDE_VULKAN
 #include <algorithm>
@@ -33,50 +33,7 @@ const int MAX_FRAMES_IN_FLIGHT = 2;
 // Validation layers
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"};
-/*
-struct Vertex {
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
 
-    static VkVertexInputBindingDescription getBindingDescriptor() {
-        VkVertexInputBindingDescription bindingDescriptor{};
-        bindingDescriptor.binding = 0;
-        bindingDescriptor.stride = sizeof(Vertex);
-        bindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        return bindingDescriptor;
-    }
-    static std::array<VkVertexInputAttributeDescription, 3>
-    getAttributeDescription() {
-        std::array<VkVertexInputAttributeDescription, 3>
-            attributeDescriptions{};
-
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-        attributeDescriptions[2].binding = 0;
-        attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-        return attributeDescriptions;
-    }
-};
-
-struct UniformBufferObject {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
-*/
 #ifdef NDEBUG
 const bool enableVailidationLayers = false;
 #else
@@ -221,21 +178,6 @@ class Renderer {
     void createIndexBuffer();
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-    /*
-        const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-            {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-            {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-            {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
-
-        const std::vector<uint16_t> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7,
-       4};
-    */
 
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
@@ -328,6 +270,10 @@ class Renderer {
   private:
     // Shaders
     std::unique_ptr<ShaderBase> testShader;
+    std::unique_ptr<PhysicsShader> physicsShader;
+
+    // Light
+    DirectionalLight light;
 
     // Texture
     Texture tex;

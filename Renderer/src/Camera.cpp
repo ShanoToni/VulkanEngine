@@ -14,8 +14,6 @@ Camera::Camera(GLFWwindow* window, glm::vec3 camPos, glm::vec3 camTarget,
     cameraRight = glm::normalize(glm::cross(cameraFront, up));
     cameraUp = glm::normalize(glm::cross(cameraRight, direction));
 
-    //update();
-    count = 100;
     firstMouse = true;
 
     glfwSetWindowUserPointer(window, reinterpret_cast<void*>(this));
@@ -58,11 +56,4 @@ void Camera::update() {
     cameraUp = glm::normalize(glm::cross(cameraRight, direction));
 
     cameraFront = glm::normalize(direction);
-    if (count == 0) {
-        count = 100;
-        std::cout <<"Dir:" <<glm::to_string(direction) << std::endl;
-        std::cout << "Pitch pls:" << pitch << std::endl;
-    } else {
-        --count;
-    }
 }
