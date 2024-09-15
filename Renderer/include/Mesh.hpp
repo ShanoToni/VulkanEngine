@@ -129,12 +129,13 @@ class Mesh {
                             VkCommandPool commandPool, VkQueue graphicsQueue);
     void createIndexBuffer(VkDevice& device, VkPhysicalDevice& physicalDevice,
                            VkCommandPool commandPool, VkQueue graphicsQueue);
-    void createDescriptorSets(std::vector<VkImage> swapChainImages,
-                              VkDescriptorSetLayout descriptorSetLayout,
-                              VkDescriptorPool descriptorPool, VkDevice device);
+    virtual void createDescriptorSets(std::vector<VkImage> swapChainImages,
+                                      VkDescriptorSetLayout descriptorSetLayout,
+                                      VkDescriptorPool descriptorPool,
+                                      VkDevice device);
     void createUniformBuffers(std::vector<VkImage> swapChainImages,
                               VkDevice device, VkPhysicalDevice physicalDevice);
-    void updateUniformBuffer(uint32_t currentImage, Camera& cam,
+    void updateUniformBuffer(size_t currentImage, Camera& cam,
                              VkExtent2D swapChainExtent, VkDevice device);
 
     std::vector<Vertex> getVertices() { return vertices; }
@@ -142,7 +143,9 @@ class Mesh {
     void setIndices(std::vector<uint32_t> indicesToSet);
 
     glm::mat4 getModel() { return model; }
-    VkDescriptorSet& getDescriptorSet() { return descriptorSet; }
+    VkDescriptorSet& getDescriptorSet(uint32_t idx) {
+        return descriptorSets[idx];
+    }
     std::vector<VkBuffer>& getUniformBuffers() { return uniformBuffers; }
     std::vector<VkDeviceMemory>& getUniformBufferMemory() {
         return uniformBuffersMemory;
@@ -159,7 +162,7 @@ class Mesh {
   protected:
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
-    VkDescriptorSet descriptorSet;
+    std::vector<VkDescriptorSet> descriptorSets;
     BasicUBO ubo;
     glm::mat4 model;
 
@@ -169,6 +172,7 @@ class Mesh {
     VkDeviceMemory indexBufferMemory;
 
     std::vector<VkBuffer> uniformBuffers;
+    std::vector<void*> uniformBuffersMapped;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
 
     std::unique_ptr<Texture> texture;

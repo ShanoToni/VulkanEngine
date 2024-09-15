@@ -77,8 +77,8 @@ void PhysicsShader::createDescriptorPool(VkDevice device, int swapChainSize) {
     }
 }
 
-void PhysicsShader::createDescriptorSet(std::vector<VkImage> swapChainImages,
-                                        VkDevice device) {
+void PhysicsShader::createDescriptorSets(std::vector<VkImage> swapChainImages,
+                                         VkDevice device) {
     for (auto& mesh : getMeshes()) {
         mesh->createDescriptorSets(swapChainImages, descriptorSetLayout,
                                    descriptorPool, device);
@@ -87,4 +87,21 @@ void PhysicsShader::createDescriptorSet(std::vector<VkImage> swapChainImages,
 
 void PhysicsShader::addMesh(PhysicsMesh* mesheToAdd) {
     meshes.push_back(std::make_shared<PhysicsMesh>(*mesheToAdd));
+}
+
+void PhysicsShader::cleanup(VkDevice device) {
+    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    for (auto& mesh : meshes) {
+        vkDestroyBuffer(device, mesh->getIndexBuffer(), nullptr);
+        vkFreeMemory(device, mesh->getIndexBufferMemory(), nullptr);
+
+        vkDestroyBuffer(device, mesh->getVertexBuffer(), nullptr);
+        vkFreeMemory(device, mesh->getVertexBufferMemory(), nullptr);
+        for (size_t i = 0; i < mesh->getUniformBuffers().size(); i++) {
+            vkDestroyBuffer(device, mesh->getUniformBuffers()[i], nullptr);
+            vkFreeMemory(device, mesh->getUniformBufferMemory()[i], nullptr);
+            vkDestroyBuffer(device, mesh->getDirLightBuffers()[i], nullptr);
+            vkFreeMemory(device, mesh->getDirLightBufferMemory()[i], nullptr);
+        }
+    }
 }

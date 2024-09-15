@@ -8,7 +8,7 @@ Mesh::Mesh() { model = glm::mat4(1.0f); }
 Mesh::Mesh(const Mesh& other) {
     vertices = other.vertices;
     indices = other.indices;
-    descriptorSet = other.descriptorSet;
+    descriptorSets = other.descriptorSets;
     ubo = other.ubo;
     model = other.model;
 
@@ -20,7 +20,9 @@ Mesh::Mesh(const Mesh& other) {
     uniformBuffers = other.uniformBuffers;
     uniformBuffersMemory = other.uniformBuffersMemory;
 
-    texture.reset(other.texture.get());
+    if (other.texture) {
+        texture.reset(other.texture.get());
+    }
 }
 
 Mesh::Mesh(std::vector<Vertex> verts) {
@@ -62,6 +64,7 @@ Mesh::Mesh(std::string filePath) {
         }
     }
     model = glm::mat4(1.0f);
+    ubo.model = model;
 }
 
 void Mesh::translate(glm::vec3 translateVector) {
@@ -152,7 +155,8 @@ void Mesh::createDescriptorSets(std::vector<VkImage> swapChainImages,
         static_cast<uint32_t>(swapChainImages.size());
     allocInfo.pSetLayouts = layouts.data();
 
-    if (vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet) !=
+    descriptorSets.resize(swapChainImages.size());
+    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
         VK_SUCCESS) {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
@@ -172,7 +176,7 @@ void Mesh::createDescriptorSets(std::vector<VkImage> swapChainImages,
 
         VkWriteDescriptorSet descriptorWrite{};
         descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptorSet;
+        descriptorWrite.dstSet = descriptorSets[i];
         descriptorWrite.dstBinding = 0;
         descriptorWrite.dstArrayElement = 0;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -190,6 +194,7 @@ void Mesh::createUniformBuffers(std::vector<VkImage> swapChainImages,
 
     uniformBuffers.resize(swapChainImages.size());
     uniformBuffersMemory.resize(swapChainImages.size());
+    uniformBuffersMapped.resize(swapChainImages.size());
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
         createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -197,25 +202,25 @@ void Mesh::createUniformBuffers(std::vector<VkImage> swapChainImages,
                          VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                      uniformBuffers[i], uniformBuffersMemory[i], device,
                      physicalDevice);
+
+        vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0,
+                    &uniformBuffersMapped[i]);
     }
 }
 
-void Mesh::updateUniformBuffer(uint32_t currentImage, Camera& cam,
+void Mesh::updateUniformBuffer(size_t currentImage, Camera& cam,
                                VkExtent2D swapChainExtent, VkDevice device) {
     ubo.model = model;
 
     ubo.view = cam.getView();
-    ubo.proj = glm::perspective(
-        glm::radians(45.0f),
-        swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 999999.f);
+    ubo.proj =
+        glm::perspective(glm::radians(45.0f),
+                         swapChainExtent.width / (float)swapChainExtent.height,
+                         0.001f, 999999.f);
     ubo.proj[1][1] *= -1;
     ubo.model = model;
 
-    void* data;
-    vkMapMemory(device, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0,
-                &data);
-    memcpy(data, &ubo, sizeof(ubo));
-    vkUnmapMemory(device, uniformBuffersMemory[currentImage]);
+    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
 void Mesh::setIndices(std::vector<uint32_t> indicesToSet) {

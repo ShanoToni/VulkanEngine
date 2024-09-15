@@ -7,7 +7,6 @@
 #include "Camera.hpp"
 #include "DirectionalLight.hpp"
 #include "Mesh.hpp"
-#include "Texture.hpp"
 #include "utils.hpp"
 
 #include <fstream>
@@ -45,13 +44,21 @@ class PhysicsMesh : public Mesh {
     // Overrides
     void createDescriptorSets(std::vector<VkImage> swapChainImages,
                               VkDescriptorSetLayout descriptorSetLayout,
-                              VkDescriptorPool descriptorPool, VkDevice device);
+                              VkDescriptorPool descriptorPool,
+                              VkDevice device) override;
     // Additions
     void createLightingUBOBuffers(std::vector<VkImage> swapChainImages,
                                   VkDevice device,
                                   VkPhysicalDevice physicalDevice);
     void setLightingUBOBuffers(uint32_t currentImage, VkDevice device,
                                DirectionalLight* dirLight);
+
+    std::vector<VkBuffer>& getDirLightBuffers() {
+        return directionalLightBuffers;
+    }
+    std::vector<VkDeviceMemory>& getDirLightBufferMemory() {
+        return directionalLightBuffersMemory;
+    }
 
   protected:
     DirectionalLightStruct directionalLightData;

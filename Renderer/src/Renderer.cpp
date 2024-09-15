@@ -24,12 +24,12 @@ Renderer::Renderer()
     mesh->scale(glm::vec3(10.f, 1.f, 10.f));
     const std::vector<uint32_t> indices = {0, 1, 2, 1, 3, 2};
     mesh->setIndices(indices);
-#ifdef __linux__
-    tex = Texture("./bin/resources/textures/statue.jpg");
-#elif _WIN32
-    tex = Texture("bin/Debug/resources/textures/statue.jpg");
-#endif
-    mesh->setTexture(&tex);
+    // #ifdef __linux__
+    //     tex = Texture("./bin/resources/textures/statue.jpg");
+    // #elif _WIN32
+    //     tex = Texture("bin/Debug/resources/textures/statue.jpg");
+    // #endif
+    //     mesh->setTexture(&tex);
 
     // testShader.reset(new ShaderBase({std::move(mesh)}));
     physicsShader.reset(new PhysicsShader({std::move(mesh)}));
@@ -112,7 +112,7 @@ void Renderer::drawFrame() {
     }
     imagesInFlight[imageIndex] = inFlightFences[currentFrame];
 
-    updateUniformBuffer(currentFrame);
+    updateUniformBuffer(imageIndex);
 
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
@@ -597,6 +597,7 @@ void Renderer::createUniformBuffers() {
     // for (auto& mesh : testShader->getMeshes()) {
     //     mesh->createUniformBuffers(swapChainImages, device, physicalDevice);
     // }
+
     for (auto& mesh : physicsShader->getMeshes()) {
         mesh->createUniformBuffers(swapChainImages, device, physicalDevice);
         mesh->createLightingUBOBuffers(swapChainImages, device, physicalDevice);
@@ -609,8 +610,7 @@ void Renderer::updateUniformBuffer(size_t currentImage) {
     //                               swapChainExtent, device);
     // }
     for (auto& mesh : physicsShader->getMeshes()) {
-        mesh->updateUniformBuffer(static_cast<uint32_t>(currentImage), *cam,
-                                  swapChainExtent, device);
+        mesh->updateUniformBuffer(currentImage, *cam, swapChainExtent, device);
         mesh->setLightingUBOBuffers(currentImage, device, &light);
     }
 }
@@ -623,7 +623,7 @@ void Renderer::createDescriptorPool() {
 }
 
 void Renderer::createTextureImage() {
-    tex.createTexture(device, physicalDevice, commandPool, graphicsQueue);
+    //    tex.createTexture(device, physicalDevice, commandPool, graphicsQueue);
 }
 
 void Renderer::createImage(uint32_t W, uint32_t H, VkFormat format,
@@ -690,9 +690,9 @@ VkImageView Renderer::createImageView(VkImage image, VkFormat format,
 }
 
 void Renderer::createTextureImageView() {
-    textureImageView =
+    /*textureImageView =
         createImageView(tex.getTextureImage(), VK_FORMAT_R8G8B8A8_SRGB,
-                        VK_IMAGE_ASPECT_COLOR_BIT);
+                        VK_IMAGE_ASPECT_COLOR_BIT);*/
 }
 
 void Renderer::createImageViews() {
@@ -705,7 +705,8 @@ void Renderer::createImageViews() {
     }
 }
 
-void Renderer::createTextureSampler() { tex.createTextureSampler(device); }
+void Renderer::createTextureSampler() { /*tex.createTextureSampler(device);*/
+}
 
 VkFormat Renderer::findSupportedFormat(const std::vector<VkFormat>& candidates,
                                        VkImageTiling tiling,
@@ -872,7 +873,7 @@ void Renderer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width,
 
 void Renderer::createDescriptorSets() {
     // testShader->createDescriptorSet(swapChainImages, device);
-    physicsShader->createDescriptorSet(swapChainImages, device);
+    physicsShader->createDescriptorSets(swapChainImages, device);
 }
 
 void Renderer::createFrameBuffers() {
@@ -992,7 +993,8 @@ void Renderer::recordCommandBuffer(VkCommandBuffer commandBuffer,
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 physicsShader->getPipelineLayout(), 0, 1,
-                                &(mesh->getDescriptorSet()), 0, nullptr);
+                                &(mesh->getDescriptorSet(imageIndex)), 0,
+                                nullptr);
 
         // vkCmdDraw(commandBuffer,
         // static_cast<uint32_t>(mesh->getVertices().size()), 1, 0, 0);
@@ -1191,9 +1193,9 @@ void Renderer::setupDebugMessenger() {
 
 void Renderer::cleanupSwapchain() {
 
-    // vkDestroyImageView(device, depthImageView, nullptr);
-    // vkDestroyImage(device, depthImage, nullptr);
-    // vkFreeMemory(device, depthImageMemory, nullptr);
+    vkDestroyImageView(device, depthImageView, nullptr);
+    vkDestroyImage(device, depthImage, nullptr);
+    vkFreeMemory(device, depthImageMemory, nullptr);
 
     for (auto framebuffer : swapChainFrameBuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -1215,13 +1217,12 @@ void Renderer::cleanupSwapchain() {
 void Renderer::cleanup() {
     cleanupSwapchain();
 
-    // vkDestroyDescriptorPool(device, testShader->getDescriptorPool(),
-    // nullptr);
     vkDestroyDescriptorPool(device, physicsShader->getDescriptorPool(),
                             nullptr);
-    tex.cleanup(device);
+    // tex.cleanup(device);
 
-    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+    // vkDestroyDescriptorSetLayout(
+    //     device, physicsShader->getDescriptorSetLayout(), nullptr);
 
     // shaders
     // testShader->cleanup(device);

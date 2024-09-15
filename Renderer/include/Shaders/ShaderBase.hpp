@@ -16,8 +16,8 @@ class ShaderBase {
                             VertexData dataType);
     void createDescritorSetLayout(VkDevice device);
     void createDescriptorPool(VkDevice device, int swapChainSize);
-    void createDescriptorSet(std::vector<VkImage> swapChainImages,
-                             VkDevice device);
+    virtual void createDescriptorSets(std::vector<VkImage> swapChainImages,
+                                      VkDevice device);
 
     VkPipeline getPipeline() { return ShaderPipeline; }
     inline VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
@@ -27,7 +27,7 @@ class ShaderBase {
         return descriptorSetLayout;
     }
 
-    const std::vector<std::unique_ptr<Mesh>>& getMeshes() { return meshes; }
+    const std::vector<std::shared_ptr<Mesh>>& getMeshes() { return meshes; }
     // inline bool inUse() { return meshes.size() > 0 ? true : false; }
 
     // virtual ~ShaderBase() = 0;
@@ -37,7 +37,7 @@ class ShaderBase {
   private:
     void addMesh(Mesh* mesheToAdd);
 
-    std::vector<std::unique_ptr<Mesh>> meshes;
+    std::vector<std::shared_ptr<Mesh>> meshes;
 
   protected:
 #ifdef __linux__

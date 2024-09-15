@@ -3,7 +3,7 @@
 PhysicsMesh::PhysicsMesh(const PhysicsMesh& other) {
     vertices = other.vertices;
     indices = other.indices;
-    descriptorSet = other.descriptorSet;
+    descriptorSets = other.descriptorSets;
     ubo = other.ubo;
     model = other.model;
 
@@ -38,7 +38,8 @@ void PhysicsMesh::createDescriptorSets(
         static_cast<uint32_t>(swapChainImages.size());
     allocInfo.pSetLayouts = layouts.data();
 
-    if (vkAllocateDescriptorSets(device, &allocInfo, &descriptorSet) !=
+    descriptorSets.resize(swapChainImages.size());
+    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) !=
         VK_SUCCESS) {
         throw std::runtime_error("Failed to allocate descriptor sets!");
     }
@@ -63,7 +64,7 @@ void PhysicsMesh::createDescriptorSets(
 
         VkWriteDescriptorSet uboDescriptorWrite{};
         uboDescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        uboDescriptorWrite.dstSet = descriptorSet;
+        uboDescriptorWrite.dstSet = descriptorSets[i];
         uboDescriptorWrite.dstBinding = 0;
         uboDescriptorWrite.dstArrayElement = 0;
         uboDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -72,7 +73,7 @@ void PhysicsMesh::createDescriptorSets(
 
         VkWriteDescriptorSet dirDescriptorWrite{};
         dirDescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        dirDescriptorWrite.dstSet = descriptorSet;
+        dirDescriptorWrite.dstSet = descriptorSets[i];
         dirDescriptorWrite.dstBinding = 1;
         dirDescriptorWrite.dstArrayElement = 0;
         dirDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

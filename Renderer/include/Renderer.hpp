@@ -249,7 +249,6 @@ class Renderer {
 
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
-    std::vector<void*> uniformBuffersMapped;
 
     // Memory requirements
     uint32_t findMemoryType(uint32_t typeFilter,
@@ -276,7 +275,7 @@ class Renderer {
     DirectionalLight light;
 
     // Texture
-    Texture tex;
+    // Texture tex;
 
     // Camera
     Camera* cam;

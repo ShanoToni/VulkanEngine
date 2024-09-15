@@ -245,8 +245,8 @@ void ShaderBase::createDescriptorPool(VkDevice device, int swapChainSize) {
     }
 }
 
-void ShaderBase::createDescriptorSet(std::vector<VkImage> swapChainImages,
-                                     VkDevice device) {
+void ShaderBase::createDescriptorSets(std::vector<VkImage> swapChainImages,
+                                      VkDevice device) {
     for (auto& mesh : getMeshes()) {
         mesh->createDescriptorSets(swapChainImages, descriptorSetLayout,
                                    descriptorPool, device);
@@ -254,7 +254,8 @@ void ShaderBase::createDescriptorSet(std::vector<VkImage> swapChainImages,
 }
 
 void ShaderBase::addMesh(Mesh* meshToAdd) {
-    meshes.push_back(std::make_unique<Mesh>(*meshToAdd));
+    std::shared_ptr<Mesh> tmp(meshToAdd);
+    meshes.push_back(std::move(tmp));
 }
 
 void ShaderBase::cleanup(VkDevice device) {
@@ -265,6 +266,13 @@ void ShaderBase::cleanup(VkDevice device) {
 
         vkDestroyBuffer(device, mesh->getVertexBuffer(), nullptr);
         vkFreeMemory(device, mesh->getVertexBufferMemory(), nullptr);
+        for (size_t i = 0; i < mesh->getUniformBuffers().size(); i++) {
+            vkDestroyBuffer(device, mesh->getUniformBuffers()[i], nullptr);
+            vkFreeMemory(device, mesh->getUniformBufferMemory()[i], nullptr);
+        }
+        if (mesh->getTexture()) {
+            mesh->getTexture()->cleanup(device);
+        }
     }
 }
 
