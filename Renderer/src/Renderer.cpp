@@ -38,7 +38,6 @@ Renderer::Renderer()
 void Renderer::run() {
     initVulkan();
     mainLoop();
-    cleanup();
 }
 
 void Renderer::initVulkan() {
@@ -705,8 +704,7 @@ void Renderer::createImageViews() {
     }
 }
 
-void Renderer::createTextureSampler() { /*tex.createTextureSampler(device);*/
-}
+void Renderer::createTextureSampler() { /*tex.createTextureSampler(device);*/ }
 
 VkFormat Renderer::findSupportedFormat(const std::vector<VkFormat>& candidates,
                                        VkImageTiling tiling,
@@ -1193,9 +1191,9 @@ void Renderer::setupDebugMessenger() {
 
 void Renderer::cleanupSwapchain() {
 
-    vkDestroyImageView(device, depthImageView, nullptr);
-    vkDestroyImage(device, depthImage, nullptr);
     vkFreeMemory(device, depthImageMemory, nullptr);
+    vkDestroyImage(device, depthImage, nullptr);
+    vkDestroyImageView(device, depthImageView, nullptr);
 
     for (auto framebuffer : swapChainFrameBuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
