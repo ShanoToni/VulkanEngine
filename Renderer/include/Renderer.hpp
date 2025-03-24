@@ -265,11 +265,14 @@ class Renderer {
 
   public:
     inline void setFrameBufferResized(bool var) { frameBufferResized = var; }
+    void addMesh(PhysicsMesh* meshToAdd);
+    void addMesh(std::vector<PhysicsMesh*> meshesToAdd);
 
   private:
     // Shaders
     std::unique_ptr<ShaderBase> testShader;
     std::unique_ptr<PhysicsShader> physicsShader;
+    std::vector<PhysicsMesh*> meshes;
 
     // Light
     DirectionalLight light;
@@ -353,6 +356,141 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     cam->getCamFront() = glm::normalize(direction);
 
     cam->update();
+}
+
+static std::vector<Vertex> getPlaneVerts() {
+    return {{{-1.0f, 0.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{1.0f, 0.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{-1.0f, 0.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{1.0f, 0.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {0.0f, 1.0f, 0.0f}}};
+}
+
+static std::vector<uint32_t> getPlaneIndices() { return {0, 1, 2, 1, 3, 2}; }
+
+static std::vector<Vertex> getCubeVerts() {
+    return {// top
+            {{-1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{-1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {0.0f, 1.0f, 0.0f}},
+            {{1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {0.0f, 1.0f, 0.0f}},
+            // bottom
+            {{1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {0.0f, -1.0f, 0.0f}},
+            {{-1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {0.0f, -1.0f, 0.0f}},
+            {{1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {0.0f, -1.0f, 0.0f}},
+            {{-1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {0.0f, -1.0f, 0.0f}},
+            // face
+            {{-1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {0.0f, 0.0f, -1.0f}},
+            {{1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {0.0f, 0.0f, -1.0f}},
+            {{-1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {0.0f, 0.0f, -1.0f}},
+            {{1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {0.0f, 0.0f, -1.0f}},
+            // face away
+            {{1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {0.0f, 0.0f, 1.0f}},
+            {{-1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {0.0f, 0.0f, 1.0f}},
+            {{1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {0.0f, 0.0f, 1.0f}},
+            {{-1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {0.0f, 0.0f, 1.0f}},
+            // left
+            {{1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {-1.0f, 0.0f, 0.0f}},
+            {{1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {-1.0f, 0.0f, 0.0f}},
+            {{1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {-1.0f, 0.0f, 0.0f}},
+            {{1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {-1.0f, 0.0f, 0.0f}},
+            // right
+            {{-1.0f, -1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 0.0f},
+             {1.0f, 0.0f, 0.0f}},
+            {{-1.0f, -1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 0.0f},
+             {1.0f, 0.0f, 0.0f}},
+            {{-1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {1.0f, 1.0f},
+             {1.0f, 0.0f, 0.0f}},
+            {{-1.0f, 1.0f, -1.0f},
+             {1.0f, 1.0f, 1.0f},
+             {0.0f, 1.0f},
+             {1.0f, 0.0f, 0.0f}}};
+}
+
+static std::vector<uint32_t> getCubeIndices() {
+    return {/*top*/ 0,    1,  2,  1,  3,  2,
+            /*bottom*/ 6, 5,  4,  6,  7,  5,
+            /*face*/ 8,   9,  10, 11, 10, 9,
+            /*back*/ 14,  13, 12, 14, 15, 13,
+            /*left*/ 16,  17, 18, 17, 19, 18,
+            /*right*/ 22, 21, 20, 22, 23, 21};
 }
 
 #endif // RENDERER_CLASS

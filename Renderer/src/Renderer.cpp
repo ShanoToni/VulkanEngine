@@ -3,27 +3,7 @@
 Renderer::Renderer()
     : physicalDevice(VK_NULL_HANDLE), currentFrame(0),
       frameBufferResized(false) {
-    const std::vector<Vertex> vertices = {{{-1.0f, 0.0f, 1.0f},
-                                           {1.0f, 0.0f, 0.0f},
-                                           {0.0f, 0.0f},
-                                           {0.0f, 1.0f, 0.0f}},
-                                          {{1.0f, 0.0f, 1.0f},
-                                           {1.0f, 0.0f, 0.0f},
-                                           {1.0f, 0.0f},
-                                           {0.0f, 1.0f, 0.0f}},
-                                          {{-1.0f, 0.0f, -1.0f},
-                                           {1.0f, 0.0f, 1.0f},
-                                           {1.0f, 1.0f},
-                                           {0.0f, 1.0f, 0.0f}},
-                                          {{1.0f, 0.0f, -1.0f},
-                                           {0.0f, 1.0f, 1.0f},
-                                           {0.0f, 1.0f},
-                                           {0.0f, 1.0f, 0.0f}}};
 
-    PhysicsMesh* mesh = new PhysicsMesh(vertices);
-    mesh->scale(glm::vec3(10.f, 1.f, 10.f));
-    const std::vector<uint32_t> indices = {0, 1, 2, 1, 3, 2};
-    mesh->setIndices(indices);
     // #ifdef __linux__
     //     tex = Texture("./bin/resources/textures/statue.jpg");
     // #elif _WIN32
@@ -32,10 +12,10 @@ Renderer::Renderer()
     //     mesh->setTexture(&tex);
 
     // testShader.reset(new ShaderBase({std::move(mesh)}));
-    physicsShader.reset(new PhysicsShader({std::move(mesh)}));
 }
 
 void Renderer::run() {
+    physicsShader.reset(new PhysicsShader(meshes));
     initVulkan();
     mainLoop();
 }
@@ -1104,6 +1084,14 @@ void Renderer::createSyncObjects() {
             vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i])) {
             throw std::runtime_error("Failed to create semaphores or fences!");
         }
+    }
+}
+
+void Renderer::addMesh(PhysicsMesh* meshToAdd) { meshes.push_back(meshToAdd); }
+
+void Renderer::addMesh(std::vector<PhysicsMesh*> meshesToAdd) {
+    for (auto mesh : meshesToAdd) {
+        meshes.push_back(mesh);
     }
 }
 

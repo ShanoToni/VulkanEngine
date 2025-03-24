@@ -6,7 +6,24 @@
 int main() {
     Renderer app;
 
+    auto planeVertices = getPlaneVerts();
+    auto planeIndices = getPlaneIndices();
+
+    PhysicsMesh* plane = new PhysicsMesh(planeVertices);
+    plane->scale(glm::vec3(10.f, 1.f, 10.f));
+    plane->setIndices(planeIndices);
+
+    auto cubeVerts = getCubeVerts();
+    auto cubeIndices = getCubeIndices();
+    PhysicsMesh* cube = new PhysicsMesh(cubeVerts);
+    cube->setIndices(cubeIndices);
+    cube->scale(glm::vec3(2.0f, 2.0f, 2.0f));
+    cube->translate(glm::vec3(0.0f, 2.0f, 0.0f));
+
+    app.addMesh({plane, cube});
+
     try {
+
         app.run();
     } catch (const std::exception e) {
         std::cout << "RUNTIME ERROR: " << e.what() << std::endl;
