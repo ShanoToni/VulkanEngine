@@ -1095,6 +1095,10 @@ void Renderer::addMesh(std::vector<PhysicsMesh*> meshesToAdd) {
     }
 }
 
+void Renderer::addDirectionalLight(DirectionalLight lightToAdd) {
+    light = lightToAdd;
+}
+
 void Renderer::recreateSwapChain() {
     int width = 0;
     int height = 0;

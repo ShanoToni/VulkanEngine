@@ -21,6 +21,6 @@ layout(location = 2) out vec3 normals;
 void main() {
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-
+    normals = mat3(transpose(inverse(ubo.model))) * inNormals;
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
 }
