@@ -281,13 +281,13 @@ std::vector<char> ShaderBase::readfile(std::string filepath) {
 
     if (!file.is_open()) {
         if (vertexShaderPath == filepath) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
             std::string vertexShaderPath = "./bin/resources/shaders/vert.spv";
 #elif _WIN32
             return readfile("resources/shaders/physics_vert.spv");
 #endif
         } else if (fragmentShaderPath == filepath) {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
             std::string fragmentShaderPath = "./bin/resources/shaders/frag.spv";
 #elif _WIN32
             return readfile("resources/shaders/physics_frag.spv");

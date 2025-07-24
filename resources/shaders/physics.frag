@@ -60,7 +60,7 @@ vec4 CalcDirectionalLight() {
 }
 
 void main() {
-    vec4 lightColor = vec4(0, 0, 0, 1);
+    vec4 lightColor = vec4(0.3, 0.3, 0.3, 1);
     lightColor = CalcDirectionalLight();
 
     outColor = vec4((fragColor * (lightColor).xyz), 1.0);

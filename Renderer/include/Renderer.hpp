@@ -25,6 +25,10 @@
 #include "gtc/matrix_transform.hpp"
 #include <GLFW/glfw3.h>
 
+#ifdef __APPLE__
+#include <vulkan/vulkan_metal.h>
+#endif
+
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
@@ -100,7 +104,12 @@ class Renderer {
     VkPhysicalDevice physicalDevice;
     const std::vector<const char*> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-        VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME};
+        VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME
+#ifdef __APPLE__
+        , "VK_KHR_portability_subset",
+        "VK_KHR_swapchain"
+#endif
+        };
 
     // Vulkan Device
     void createLogicalDevice();

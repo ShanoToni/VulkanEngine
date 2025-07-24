@@ -27,7 +27,6 @@ int main() {
     app.addDirectionalLight(light);
 
     try {
-
         app.run();
     } catch (const std::exception e) {
         std::cout << "RUNTIME ERROR: " << e.what() << std::endl;

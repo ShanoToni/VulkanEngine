@@ -40,7 +40,7 @@ class ShaderBase {
     std::vector<std::shared_ptr<Mesh>> meshes;
 
   protected:
-#ifdef __linux__
+#if defined (__linux__) || defined (__APPLE__)
     std::string vertexShaderPath = "./bin/resources/shaders/vert.spv";
     std::string fragmentShaderPath = "./bin/resources/shaders/frag.spv";
 #elif _WIN32

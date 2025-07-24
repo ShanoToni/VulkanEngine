@@ -13,7 +13,12 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 # Dependencies
 # GLFW
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/glfw)
+# Set GLFW options before adding it
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(external/glfw)
 set(GLFW_INC ${CMAKE_SOURCE_DIR}/external/glfw/include)
 link_directories(${CMAKE_SOURCE_DIR}/external/glfw/lib)
 
@@ -37,16 +42,28 @@ add_executable(VkEngine ${SOURCES})
 target_include_directories(VkEngine PUBLIC ${Vulkan_INCLUDE_DIRS})
 target_include_directories(VkEngine PUBLIC ${GLM_INC})
 target_include_directories(VkEngine PUBLIC ${RENDER_INC})
-target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
+
+if(APPLE)
+    target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan
+        "-framework Cocoa"
+        "-framework Metal"
+        "-framework QuartzCore"
+        "-framework IOKit"
+    )
+elseif(UNIX)
+	target_link_libraries(VkEngine renderer glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
+endif()
 
 # Compile the shaders based on platform
 if(MSVC)
    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile.bat)
-endif(MSVC)
+elseif(APPLE)
+	message("Compiling mac shaders")
+	execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile_mac.sh)
+elseif(UNIX)
+    execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile.sh)
+endif()
 
-if(UNIX)
-   execute_process(COMMAND ${CMAKE_SOURCE_DIR}/scripts/compile.sh)
-endif(UNIX)
 
 if (MSVC)
 	set_target_properties(VkEngine PROPERTIES 
@@ -60,16 +77,22 @@ if (MSVC)
 		"${PROJECT_SOURCE_DIR}/resources"
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/resources
 	)
-
+	add_dependencies(VkEngine copy_resources)
+elseif(APPLE)
+	message("Copying resources to mac build dir")
+	file(COPY "${CMAKE_SOURCE_DIR}/resources"
+    	 DESTINATION "${CMAKE_BINARY_DIR}/bin")
 else()
 	# Copy
+	message("Copying resources to build directory")
 	add_custom_target(copy_resources ALL COMMAND ${CMAKE_COMMAND}
 		-E copy_directory
 		"${PROJECT_SOURCE_DIR}/resources"
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}resources
 	)
+	add_dependencies(VkEngine copy_resources)
 endif()
-add_dependencies(VkEngine copy_resources)
+
 
 
 
