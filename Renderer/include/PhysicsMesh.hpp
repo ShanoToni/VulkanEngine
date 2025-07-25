@@ -12,11 +12,12 @@
 #include <fstream>
 #include <vector>
 
-struct DirectionalLightStruct {
-    float ambientIntensity;
-    float diffuseIntensity;
+struct alignas(16) DirectionalLightStruct {
     glm::vec4 color;
     glm::vec4 direction;
+    float ambientIntensity;
+    float diffuseIntensity;
+    float _pad[2];
 };
 
 class PhysicsMesh : public Mesh {

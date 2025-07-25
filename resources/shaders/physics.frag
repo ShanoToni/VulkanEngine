@@ -6,10 +6,10 @@ layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) in vec3 normals;
 
 struct directionalLightStruct {
-    float ambientIntensity;
-    float diffuseIntensity;
     vec4 color;
     vec4 direction;
+    float ambientIntensity;
+    float diffuseIntensity;
 };
 
 layout(binding = 1) uniform DirectionalLight { directionalLightStruct base; }
@@ -60,8 +60,8 @@ vec4 CalcDirectionalLight() {
 }
 
 void main() {
-    vec4 lightColor = vec4(0.3, 0.3, 0.3, 1);
-    lightColor = CalcDirectionalLight();
+    vec4 lightColor = CalcDirectionalLight();
 
+    //outColor = vec4(1.0f);
     outColor = vec4((fragColor * (lightColor).xyz), 1.0);
 }

@@ -1,7 +1,7 @@
 #include "PhysicsShader.hpp"
 
 PhysicsShader::PhysicsShader() : ShaderBase() {
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     vertexShaderPath = "./bin/resources/shaders/physics_vert.spv";
     fragmentShaderPath = "./bin/resources/shaders/physics_frag.spv";
 #elif _WIN32
@@ -15,7 +15,7 @@ PhysicsShader::PhysicsShader(const std::vector<PhysicsMesh*> meshesToAdd)
     for (auto m : meshesToAdd) {
         meshes.push_back(std::make_shared<PhysicsMesh>(*m));
     }
-#ifdef __linux__
+#if defined(__linux__) || defined(__APPLE__)
     vertexShaderPath = "./bin/resources/shaders/physics_vert.spv";
     fragmentShaderPath = "./bin/resources/shaders/physics_frag.spv";
 #elif _WIN32

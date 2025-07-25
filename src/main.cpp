@@ -20,8 +20,8 @@ int main() {
     cube->scale(glm::vec3(2.0f, 2.0f, 2.0f));
     cube->translate(glm::vec3(0.0f, 2.0f, 0.0f));
 
-    DirectionalLight light(glm::vec3(1.0f), 0.6f, 0.9f,
-                           glm::vec3(-.9f, -1.0f, 0.8f));
+    DirectionalLight light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f, 1.9f,
+                           glm::vec3(0.9f, -1.0f, 0.8f));
 
     app.addMesh({plane, cube});
     app.addDirectionalLight(light);
